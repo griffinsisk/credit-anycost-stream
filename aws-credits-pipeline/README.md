@@ -10,79 +10,148 @@ credits-YYYY-MM.csv  →  S3 bucket  →  Lambda  →  CloudZero AnyCost Stream
                                     CloudWatch Logs
 ```
 
-## Prerequisites
-
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) configured with credentials for your target account
-- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-- Python 3.12+
-- A CloudZero account with an AnyCost Stream billing connection
-
 ---
 
-## Step 1 — Get your CloudZero API key
+## Before you start — install the tools
 
-1. Log into CloudZero
-2. Go to **Settings → API Keys**
-3. Create a new key (or use an existing one)
-4. Copy the key value — you'll use it as `CLOUDZERO_API_KEY`
-
-> The API key is used directly in the `Authorization` header with no `Bearer` prefix.
-
----
-
-## Step 2 — Get your AnyCost Stream connection ID
-
-1. In CloudZero, go to **Settings → Billing Connections**
-2. Find your **AnyCost Stream** connection (create one if it doesn't exist)
-3. Copy the connection ID from the connection's detail page — you'll use it as `CLOUDZERO_CONNECTION_ID`
-
----
-
-## Step 3 — Set environment variables
+You need two CLI tools installed. Run these commands to check if they're already installed:
 
 ```bash
-export CLOUDZERO_API_KEY=<paste your API key here>
-export CLOUDZERO_CONNECTION_ID=<paste your connection ID here>
+aws --version
+sam --version
 ```
 
-These are read at deploy time and passed securely to Lambda as environment variables. They are never hardcoded in any file.
+If either is missing:
+
+```bash
+# Install AWS CLI (macOS)
+brew install awscli
+
+# Install SAM CLI (macOS)
+brew install aws-sam-cli
+```
+
+You also need your AWS CLI configured with credentials for the account you're deploying into. If you haven't done this yet:
+
+```bash
+aws configure
+```
+
+It will prompt you for your AWS Access Key ID, Secret Access Key, default region (e.g. `us-east-1`), and output format (just press Enter for default).
 
 ---
 
-## Step 4 — Build and deploy
+## Step 1 — Set your credentials as environment variables
+
+You need two values from CloudZero. Open a terminal and run both export commands with your real values pasted in:
 
 ```bash
-# Install SAM CLI (macOS)
-brew install aws-sam-cli
+export CLOUDZERO_API_KEY=paste_your_api_key_here
+export CLOUDZERO_CONNECTION_ID=paste_your_connection_id_here
+```
 
-# Build the Lambda package
+> **Important:** These exports only last for your current terminal session. If you close the terminal and reopen it, you'll need to run these again before deploying.
+
+To confirm they're set:
+
+```bash
+echo $CLOUDZERO_API_KEY
+echo $CLOUDZERO_CONNECTION_ID
+```
+
+Both should print your values (not blank).
+
+---
+
+## Step 2 — Build the Lambda package
+
+From inside the `aws-credits-pipeline/` folder, run:
+
+```bash
 sam build
+```
 
-# First-time deploy — walks you through region, S3 artifact bucket, stack name
+This packages your Python code and dependencies for Lambda. You should see `Build Succeeded` at the end. If you see errors, make sure you're in the right folder.
+
+---
+
+## Step 3 — Deploy to AWS
+
+### First time only — run the guided deploy
+
+```bash
 sam deploy --guided
+```
 
-# Subsequent deploys
+SAM will walk you through a series of prompts. Here's what to enter:
+
+| Prompt | What to enter |
+|---|---|
+| Stack Name | `aws-credits-pipeline` (or press Enter to accept) |
+| AWS Region | Your target region, e.g. `us-east-1` |
+| Parameter CloudZeroApiKey | Press Enter — SAM reads it from your env var |
+| Parameter CloudZeroConnectionId | Press Enter — SAM reads it from your env var |
+| Confirm changes before deploy | `y` |
+| Allow SAM CLI IAM role creation | `y` |
+| Save arguments to configuration file | `y` |
+| SAM configuration file | Press Enter to accept `samconfig.toml` |
+| SAM configuration environment | Press Enter to accept `default` |
+
+After the prompts, SAM will show you a changeset (what it's about to create) and ask:
+
+```
+Deploy this changeset? [y/N]
+```
+
+Enter `y` to proceed.
+
+### What gets created
+
+- An S3 bucket named `aws-credits-pipeline-<AccountId>-<Region>`
+- A Lambda function named `aws-credits-processor`
+- An IAM role with least-privilege permissions
+
+### Subsequent deploys
+
+After the first deploy, just run:
+
+```bash
 sam deploy
 ```
 
-During `sam deploy --guided` you will be prompted to confirm the parameter overrides — SAM reads `CLOUDZERO_API_KEY` and `CLOUDZERO_CONNECTION_ID` from your shell environment and passes them in.
-
-The deploy creates:
-- An S3 bucket named `aws-credits-pipeline-{AccountId}-{Region}`
-- A Lambda function named `aws-credits-processor`
-- An IAM role scoped to CloudWatch writes and `s3:GetObject` on credits files only
-
 ---
 
-## Step 5 — Upload a credits file
+## Step 4 — Upload a credits file
 
-The filename must match the pattern `credits-YYYY-MM.csv`. The billing month is parsed from the filename — not the upload timestamp.
+The filename must follow the pattern `credits-YYYY-MM.csv`. The billing month is read from the filename, not the upload date.
+
+Replace `<AccountId>` and `<Region>` with your values (you can find the bucket name in the deploy output):
 
 ```bash
 aws s3 cp credits-2025-01.csv s3://aws-credits-pipeline-<AccountId>-<Region>/credits-2025-01.csv
 ```
 
-The Lambda triggers automatically on upload.
+The Lambda triggers automatically within a few seconds of the upload.
+
+---
+
+## Step 5 — Verify it worked
+
+### Check CloudWatch Logs
+
+1. Open the [AWS Console](https://console.aws.amazon.com)
+2. Go to **CloudWatch → Log groups**
+3. Find `/aws/lambda/aws-credits-processor`
+4. Open the most recent log stream
+5. Look for a structured JSON summary log with fields like `billing_month`, `row_count`, `total_credit_usd`
+
+### Check CloudZero
+
+Credits should appear in your AnyCost Stream connection for the uploaded billing month within a few minutes.
+
+### Re-uploading the same file is safe
+
+The pipeline uses `replace_drop` — re-uploading the same month replaces the existing data rather than adding duplicates.
 
 ---
 
@@ -95,22 +164,7 @@ No header row. Two columns:
 | 0 | AWS Account ID (12 digits, leading zeros matter) | `054736553085` |
 | 1 | USD credit amount | `$0.00`, `"$6,407.96"`, `"$116,319.27"` |
 
-If an account ID appears more than once, the first row is kept and subsequent duplicates are logged as warnings and skipped.
-
----
-
-## Verifying the run
-
-**CloudWatch Logs:**
-```
-/aws/lambda/aws-credits-processor
-```
-A successful run emits a structured JSON summary log with fields: `file`, `billing_month`, `row_count`, `unique_accounts`, `total_credit_usd`.
-
-**CloudZero:**
-After a successful run, credits appear in the AnyCost Stream connection for the uploaded billing month.
-
-**Re-uploading the same file is safe.** The pipeline uses `replace_drop`, which replaces all data for that month rather than appending — no double-crediting.
+If an account ID appears more than once, the first row is used and duplicates are skipped with a warning in the logs.
 
 ---
 
@@ -123,7 +177,7 @@ pytest tests/ --cov=src --cov-report=term-missing
 
 ---
 
-## Local smoke test (no deploy needed)
+## Local smoke test (optional — no deploy needed)
 
 ```bash
 sam build
