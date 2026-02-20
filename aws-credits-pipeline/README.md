@@ -1,4 +1,4 @@
-# AWS Credits Pipeline
+# AWS MAP Credits Pipeline
 
 Automates the monthly push of AWS credits into CloudZero. Drop a credits CSV into S3 — Lambda parses it and posts the data to CloudZero's AnyCost Stream billing drop API automatically.
 
