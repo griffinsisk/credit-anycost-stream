@@ -1,0 +1,3642 @@
+openapi: 3.1.0
+info:
+  version: 2.0.0
+  title: CloudZero API V2 Resources
+  description: CloudZero V2 API
+  contact:
+    name: CloudZero Support
+    url: https://www.cloudzero.com/contact
+    email: support@cloudzero.com
+  license:
+    name: BSD 3
+    identifier: BSD-3
+servers:
+  - url: https://api.cloudzero.com
+tags:
+  - name: budgets
+    description: Budget Resources
+  - name: costformation
+    description: CloudZero CostFormation Resources
+  - name: insights
+    description: Insight Resources
+  - name: views
+    description: View Resources
+  - name: billing_connections
+    description: Billing Connection Resources
+  - name: billing
+    description: Billing Resources
+paths:
+  /v2/optimize/comments/{comment_id}:
+    delete:
+      tags:
+        - comments
+      summary: Delete comment
+      description: Deletes a comment on a recommendation.
+      operationId: delete_v2_optimize_comments__comment_id__delete
+      parameters:
+        - description: The ID of the comment to delete
+          required: true
+          schema:
+            type: string
+            title: Comment Id
+            description: The ID of the comment to delete
+          name: comment_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCommentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      tags:
+        - comments
+      summary: Update comment
+      description: Updates a comment on a recommendation.
+      operationId: patch_v2_optimize_comments__comment_id__patch
+      parameters:
+        - description: The ID of the comment to update
+          required: true
+          schema:
+            type: string
+            title: Comment Id
+            description: The ID of the comment to update
+          name: comment_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCommentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+  /v2/optimize/recommendations/{recommendation_id}:
+    get:
+      tags:
+        - recommendations
+      summary: Get recommendation
+      description: Gets a recommendation.
+      operationId: get_one_v2_optimize_recommendations__recommendation_id__get
+      parameters:
+        - description: The ID of the recommendation to get
+          required: true
+          schema:
+            type: string
+            title: Recommendation Id
+            description: The ID of the recommendation to get
+          name: recommendation_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRecommendationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+  /v2/optimize/recommendations/{recommendation_id}/comments:
+    get:
+      tags:
+        - comments
+      summary: Get comments for recommendation
+      description: Gets comments for a recommendation.
+      operationId: >-
+        get_comments_for_recommendation_v2_optimize_recommendations__recommendation_id__comments_get
+      parameters:
+        - description: The ID of the recommendation to get comments for
+          required: true
+          schema:
+            type: string
+            title: Recommendation Id
+            description: The ID of the recommendation to get comments for
+          name: recommendation_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCommentsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+  /v2/optimize/comments:
+    post:
+      tags:
+        - comments
+      summary: Create comment
+      description: Creates a comment on one or more recommendations.
+      operationId: post_v2_optimize_comments_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCommentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+  /v2/optimize/recommendations:
+    get:
+      tags:
+        - recommendations
+      summary: List recommendations
+      description: Gets recommendations for a specified organization in paginated form.
+      operationId: get_all_v2_optimize_recommendations_get
+      parameters:
+        - description: Filter by status
+          required: false
+          schema:
+            anyOf:
+              - items:
+                  $ref: '#/components/schemas/Status'
+                type: array
+              - type: 'null'
+            title: Status
+            description: Filter by status
+          name: status
+          in: query
+        - required: false
+          schema:
+            anyOf:
+              - type: number
+                exclusiveMinimum: 0
+              - type: string
+            title: Cost Impact Last 30 Days[Gte]
+            default: '1.00'
+          name: cost_impact_last_30_days[gte]
+          in: query
+        - required: false
+          schema:
+            type: integer
+            minimum: 1
+            title: Limit
+            default: 60000
+          name: limit
+          in: query
+        - required: false
+          schema:
+            type: integer
+            minimum: 0
+            title: Offset
+            default: 0
+          name: offset
+          in: query
+        - required: false
+          schema:
+            $ref: '#/components/schemas/SortKeyEnum'
+            default: cost_impact_last_30_days
+          name: sort_key
+          in: query
+        - required: false
+          schema:
+            $ref: '#/components/schemas/SortOrderEnum'
+            default: desc
+          name: sort_order
+          in: query
+        - required: false
+          schema:
+            anyOf:
+              - type: string
+                format: binary
+              - type: 'null'
+            title: Cursor
+          name: cursor
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRecommendationsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      tags:
+        - recommendations
+      summary: Update recommendations
+      description: Updates recommendations.
+      operationId: update_v2_optimize_recommendations_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecommendationBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRecommendationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - APIKeyAuth: []
+  /v2/insights:
+    get:
+      operationId: getInsights
+      description: Get a list of Insights
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
+        - name: sort_key
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/insight_sort_keys'
+        - $ref: '#/components/parameters/sort_order'
+        - name: hide_resolved (Deprecated)
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/insight_hide_resolved_filter'
+        - $ref: '#/components/schemas/insight_filter_by_status'
+        - $ref: '#/components/schemas/insight_filter_by_effort'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+                  sorting:
+                    $ref: '#/components/schemas/insight_sorting'
+                  filtering:
+                    $ref: '#/components/schemas/insight_filtering'
+                  insights:
+                    $ref: '#/components/schemas/insights'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createInsight
+      description: Create a new Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/insight_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insight:
+                    $ref: '#/components/schemas/insight'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/insights/{insight_id}:
+    get:
+      operationId: getOneInsight
+      description: Get a single Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insight:
+                    $ref: '#/components/schemas/insight'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    delete:
+      operationId: deleteOneInsight
+      description: Delete a single Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insight:
+                    $ref: '#/components/schemas/with_id'
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/with_id'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      operationId: updateOneInsight
+      description: Update a single Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/insight_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insight:
+                    $ref: '#/components/schemas/insight'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/insights/{insight_id}/comments:
+    get:
+      operationId: getCommentsForOneInsight
+      description: Get a list of Comments for an Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insight:
+                    $ref: '#/components/schemas/with_id'
+                  comments:
+                    $ref: '#/components/schemas/comments'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createCommentForOneInsight
+      description: Create a new Comment for an Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/comment'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/insights/{insight_id}/comments/{comment_id}:
+    patch:
+      operationId: updateOneCommentForOneInsight
+      description: Update one Comment for an Insight
+      tags:
+        - insights
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/insight_id'
+        - $ref: '#/components/parameters/comment_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/comment'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/budgets:
+    get:
+      operationId: getBudgets
+      description: Get a list of Budgets
+      tags:
+        - budgets
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
+        - name: sort_key
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/budget_sort_keys'
+        - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/budget_get_all_expand'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+                  sorting:
+                    $ref: '#/components/schemas/budget_sorting'
+                  filtering:
+                    $ref: '#/components/schemas/budget_filtering'
+                  budgets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/budget_maybe_current_expanded'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createBudget
+      description: Create a new Budget
+      tags:
+        - budgets
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/budget_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  budget:
+                    $ref: '#/components/schemas/budget'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/budgets/{budget_id}:
+    get:
+      operationId: getOneBudget
+      description: Get a single Budget
+      tags:
+        - budgets
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/budget_id'
+        - $ref: '#/components/parameters/budget_get_one_expand'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  budget:
+                    $ref: '#/components/schemas/budget_maybe_fully_expanded'
+                required:
+                  - budget
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      operationId: updateOneBudget
+      description: Update a single Budget
+      tags:
+        - budgets
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/budget_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/budget_update'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  budget:
+                    $ref: '#/components/schemas/budget'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    delete:
+      operationId: deleteOneBudget
+      description: Delete a single Budget
+      tags:
+        - budgets
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/budget_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  budget:
+                    $ref: '#/components/schemas/with_id'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/costformation/definition/versions:
+    get:
+      operationId: getCostFormationDefinitionVersions
+      description: Get a list of CloudZero CostFormation Definition Versions.
+      tags:
+        - costformation
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
+        - name: sort_key
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/costformation_definition_versions_sort_keys'
+        - $ref: '#/components/parameters/sort_order'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+                  sorting:
+                    $ref: >-
+                      #/components/schemas/costformation_definition_versions_sorting
+                  filtering:
+                    $ref: >-
+                      #/components/schemas/costformation_definition_versions_filtering
+                  versions:
+                    $ref: '#/components/schemas/costformation_definition_versions'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createCostFormationDefinitionVersion
+      description: >-
+        Create a new CloudZero CostFormation Definition version. Ten (10) MB is
+        the general payload size limitation and it cannot be raised. For more
+        information, see the [Sample Python CostFormation
+        Script](https://docs.cloudzero.com/docs/sample-python-costformation-script).
+      tags:
+        - costformation
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/costformation_definition_validate_only'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/multipart_form_data_files'
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/text_plain'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    description: Response for creating new version
+                    properties:
+                      version:
+                        $ref: '#/components/schemas/costformation_definition_version'
+                  - type: object
+                    description: Empty response if validate_only=true
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '422':
+          $ref: >-
+            #/components/responses/badCostFormationDefinitionVersionCreateRequestError
+      security:
+        - APIKeyAuth: []
+  /v2/costformation/definition/versions/{version}:
+    get:
+      operationId: getOneCostFormationDefinitionVersion
+      description: Get a CloudZero CostFormation Definition Version
+      tags:
+        - costformation
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/costformation_definition_version'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    $ref: >-
+                      #/components/schemas/costformation_definition_version_with_url
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/views:
+    get:
+      operationId: getViews
+      description: Get a list of Views
+      tags:
+        - views
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
+        - name: sort_key
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/view_sort_keys'
+        - $ref: '#/components/parameters/sort_order'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+                  sorting:
+                    $ref: '#/components/schemas/view_sorting'
+                  filtering:
+                    $ref: '#/components/schemas/view_filtering'
+                  views:
+                    $ref: '#/components/schemas/views'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createView
+      description: Create a new View
+      tags:
+        - views
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/view_new'
+        required: true
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/view_create_update_response'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/views/{view_id}:
+    get:
+      operationId: getOneView
+      description: Get a single View
+      tags:
+        - views
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  view:
+                    $ref: '#/components/schemas/view'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      operationId: updateView
+      description: Update a single View
+      tags:
+        - views
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/view_update'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/view_create_update_response'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    delete:
+      operationId: deleteView
+      description: Delete a single View
+      tags:
+        - views
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/with_id'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/connections/billing:
+    get:
+      operationId: getBillingConnections
+      description: Get a list of Billing Connections
+      tags:
+        - billing_connections
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
+        - name: sort_key
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/billing_connection_sort_keys'
+        - $ref: '#/components/parameters/sort_order'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+                  sorting:
+                    $ref: '#/components/schemas/billing_connection_sorting'
+                  filtering:
+                    $ref: '#/components/schemas/billing_connection_filtering'
+                  connections:
+                    $ref: '#/components/schemas/billing_connections'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createBillingConnection
+      description: Create a new Billing Connection
+      tags:
+        - billing_connections
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/billing_connection_new'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: '#/components/schemas/billing_connection'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/connections/billing/{connection_id}:
+    get:
+      operationId: getOneBillingConnection
+      description: Get a single Billing Connection
+      tags:
+        - billing_connections
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: '#/components/schemas/billing_connection'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    patch:
+      operationId: updateOneBillingConnection
+      description: >
+        Update a single Billing Connection. 
+
+        **Note:** Billing connections managed by CloudZero (such as Azure, GCP,
+        and AWS) cannot be modified. This operation is supported only for
+        [AnyCost Bucket
+        connections](https://docs.cloudzero.com/docs/anycost-bucket-getting-started).
+      tags:
+        - billing_connections
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/billing_connection_update'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: '#/components/schemas/billing_connection'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    delete:
+      operationId: deleteOneBillingConnection
+      description: >
+        Delete a single Billing Connection
+
+        Upon disconnect of a billing connection, after the next ingest, all
+        billing data related to that connection will be removed from the
+        platform. However, be aware that although this data is no longer visible
+        in the platform, it will still exist in the CloudZero data stores. If
+        you need a more permanent deletion due to audit or security concerns,
+        see your CloudZero Account Manager.
+
+        Note: This is not supported for AWS and Snowflake connections
+      tags:
+        - billing_connections
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: '#/components/schemas/billing_connection'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+  /v2/connections/billing/anycost/{connection_id}/billing_drops:
+    get:
+      operationId: getAnyCostStreamConnectionBillingDrops
+      description: |
+        Get all AnyCost Stream Connection Billing Drops
+      tags:
+        - anycost_stream
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  billing_drops:
+                    $ref: >-
+                      #/components/schemas/anycost_stream_connection_billing_drop_summaries
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+      security:
+        - APIKeyAuth: []
+    post:
+      operationId: createOneAnyCostStreamConnectionBillingDrop
+      description: >
+        Create a single AnyCost Stream Connection Billing Drop.
+
+        Note: An uncompressed request body larger than 5 MB will result in a 413
+        Request Entity Too Large response. For more information, see [Sending
+        AnyCost Stream Data to
+        CloudZero](https://docs.cloudzero.com/docs/anycost-send-stream-data) and
+        the [Common Bill Format
+        (CBF)](https://docs.cloudzero.com/docs/anycost-common-bill-format-cbf)
+        page. 
+      tags:
+        - anycost_stream
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/anycost_stream_connection_billing_drop'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: >-
+                      #/components/schemas/anycost_stream_connection_billing_drop_summary
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '413':
+          $ref: '#/components/responses/requestEntityTooLargeError'
+      security:
+        - APIKeyAuth: []
+  /v2/connections/billing/anycost/{connection_id}/billing_drops/{month}:
+    get:
+      operationId: getAnyCostStreamConnectionBillingDropContents
+      description: |
+        Read AnyCost Stream Connection Billing Drop contents
+      tags:
+        - anycost_stream
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+        - $ref: '#/components/parameters/connection_id'
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  billing_drop:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/cbf_row'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '404':
+          $ref: '#/components/responses/notFoundError'
+      security:
+        - APIKeyAuth: []
+  /v2/connections/billing/anycost/validate_billing_drop:
+    post:
+      operationId: validateOneAnyCostStreamConnectionBillingDrop
+      description: >
+        Validate a single AnyCost Stream Connection Billing Drop.
+
+        Note: An uncompressed request body larger than 5 MB will result in a 413
+        Request Entity Too Large response
+      tags:
+        - anycost_stream
+      parameters:
+        - $ref: '#/components/parameters/cloudzero_idempotency_key'
+        - $ref: '#/components/parameters/cloudzero_test_key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/anycost_stream_connection_billing_drop'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connection:
+                    $ref: >-
+                      #/components/schemas/anycost_stream_connection_validate_billing_drop_summary
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '413':
+          $ref: '#/components/responses/requestEntityTooLargeError'
+      security:
+        - APIKeyAuth: []
+  /v2/billing/costs:
+    get:
+      operationId: getBillingCosts
+      description: >
+        This API will return cost data according to the parameters passed in.
+
+
+        - Rate Limit: 60 requests/day.
+
+        - Timeout: 30 seconds.
+
+        - Pagination: Results are paginated in blocks of 10,000 records.
+          - Using cursors for pagination doesn't affect the rate limit.
+          - You have 24 hours to page through your results before you will need to rerun your query.
+          - While using pagination, your results will be static as of run time.
+        - This data is statically sorted as `usage_date asc`.
+
+         NOTE: The Dimension IDs referenced within this document are the IDs by which you reference dimensions when authoring in CostFormation. You can read more about this [here](https://docs.cloudzero.com/docs/costformation-definition-language-guide#specifying-sources).
+
+        **API Call Examples**
+
+        For the following examples, the following updates need to be made before
+        running:
+
+        - Replace <START_DATE_HERE> with a properly formatted start date
+        (`2023-10-26` or (date and time encoded)
+        `2023-10-26T14%3A27%3A46%2B00%3A00`)
+
+        - Replace <GRANULARITY_VALUE_HERE> with the desired granularity
+        (`hourly`, `daily`,  `weekly`, `monthly`, `yearly`)
+
+
+        **Real Cost Grouped by Account and Service, Filtered by Cloud Provider =
+        AWS**
+
+        -
+        `https://api.cloudzero.com/v2/billing/costs?start_date=<START_DATE_HERE>&granularity=<GRANULARITY_VALUE_HERE>&group_by=Account&group_by=Service&filters=%7B%22CloudProvider%22%3A%20%5B%22AWS%22%5D%7D&cost_type=real_cost`
+
+
+        **Real Cost Grouped by Account and Service Detail Dimension, Filtered by
+        Service = AmazonS3**
+
+        -
+        `https://api.cloudzero.com/v2/billing/costs?start_date=<START_DATE_HERE>&granularity=<GRANULARITY_VALUE_HERE>&group_by=Account&group_by=CZ%3ADefined%3AServiceDetail&filters=%7B%22Service%22%3A%20%5B%22AmazonS3%22%5D%7D&cost_type=real_cost`
+
+
+        **Real Cost Grouped by by Account Name and Service**
+
+        -
+        `https://api.cloudzero.com/v2/billing/costs?start_date=<START_DATE_HERE>&granularity=<GRANULARITY_VALUE_HERE>&group_by=User%3ADefined%3AAccountName&group_by=Service&cost_type=real_cost`
+      tags:
+        - billing
+      parameters:
+        - $ref: '#/components/parameters/billing_start_date'
+        - $ref: '#/components/parameters/billing_end_date'
+        - name: granularity
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/billing_granularity'
+        - $ref: '#/components/parameters/billing_group_by'
+        - $ref: '#/components/parameters/billing_filters'
+        - name: cost_type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/billing_cost_type'
+        - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  costs:
+                    $ref: '#/components/schemas/billing_costs'
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '410':
+          $ref: '#/components/responses/expiredCacheError'
+        '429':
+          $ref: '#/components/responses/rateLimitError'
+      security:
+        - APIKeyAuth: []
+  /v2/billing/dimensions:
+    get:
+      operationId: getBillingDimensions
+      description: >
+        This API will return a list of dimensions available for use in the
+        `getBillingCosts` API and in CostFormation.
+      tags:
+        - billing
+      parameters:
+        - name: include_hidden
+          description: >
+            Include dimensions marked as hidden in CostFormation, which do not
+            appear in the CloudZero Explorer
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dimensions:
+                    $ref: '#/components/schemas/billing_dimensions'
+        '400':
+          $ref: '#/components/responses/badRequestError'
+        '403':
+          $ref: '#/components/responses/forbiddenError'
+        '410':
+          $ref: '#/components/responses/expiredCacheError'
+        '429':
+          $ref: '#/components/responses/rateLimitError'
+      security:
+        - APIKeyAuth: []
+components:
+  parameters:
+    cloudzero_test_key:
+      description: >
+        If passed, the operation executes in the namespace specified by this
+        key.
+
+        Resource mutations in the namespace last for 1 hour.
+      name: cloudzero-test-key
+      in: header
+      required: false
+      schema:
+        type: string
+    cloudzero_idempotency_key:
+      description: >
+        If passed, any subsequent operation with the same value for this header
+        will return the exact same result.
+
+        This is true for all responses, i.e. successes and errors.
+      name: cloudzero-idempotency-key
+      in: header
+      required: false
+      schema:
+        type: string
+    limit:
+      description: Number of items to return per page
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: number
+        format: int32
+    cursor:
+      description: >
+        Allows you to page forward and back in your results. NOTE: This must be
+        URL Encoded!
+         - See the [Pagination](https://docs.cloudzero.com/reference/pagination) section of the API Reference for more information!
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+    sort_order:
+      description: ASC or DESC sort order
+      name: sort_order
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/sort_order'
+    insight_id:
+      description: Unique Insight identifier
+      name: insight_id
+      in: path
+      required: true
+      schema:
+        type: string
+    comment_id:
+      description: Unique Comment identifier
+      name: comment_id
+      in: path
+      required: true
+      schema:
+        type: string
+    budget_id:
+      description: Unique budget identifier
+      name: budget_id
+      in: path
+      required: true
+      schema:
+        type: string
+    budget_get_all_expand:
+      description: >
+        If passed, query will expand the properties specified.
+
+        This is a multi-value query parameter, pass it more than once to specify
+        multiple values, e.g.
+          - `&expand=current&expand=history`
+      name: expand
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/budget_get_all_expand'
+    budget_get_one_expand:
+      description: >
+        If passed, query will expand the properties specified.
+
+        This is a multi-value query parameter, pass it more than once to specify
+        multiple values, e.g.
+          - `&expand=current&expand=history`
+      name: expand
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/budget_get_one_expand'
+    costformation_definition_version:
+      description: >
+        Unique CloudZero CostFormation Definition Version; `latest` is as an
+        alias for the most recent version.
+      name: version
+      in: path
+      required: true
+      schema:
+        type: string
+    costformation_definition_validate_only:
+      description: >
+        If passed, the endpoint will only validate the CloudZero CostFormation
+        definition, and NOT save or publish.
+      name: validate_only
+      in: query
+      required: false
+      schema:
+        type: string
+    view_id:
+      description: Unique View identifier
+      name: view_id
+      in: path
+      required: true
+      schema:
+        type: string
+    connection_id:
+      description: Unique Billing Connection identifier
+      name: connection_id
+      in: path
+      required: true
+      schema:
+        type: string
+    month:
+      description: Billing drop month (format YYYY-MM, e.g., 2023-10)
+      name: month
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/iso_datetime'
+    billing_start_date:
+      description: |
+        ISO 8601 datetime string from which to view costs.
+        - When using this form: `2023-10-26T14:27:46+00:00`
+        - When using HTTP URL (This must be encoded!):
+            - Encoded: `2023-10-26T14%3A27%3A46%2B00%3A00`
+            - Decoded: `2023-10-26T14:27:46+00:00`
+      name: start_date
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/iso_datetime'
+    billing_end_date:
+      description: >
+        ISO 8601 datetime string until which to view costs (defaults to current
+        date and time).
+
+        - When using this form: `2023-10-26T14:27:46+00:00`
+
+        - When using HTTP URL (This must be encoded!):
+            - Encoded: `2023-10-26T14%3A27%3A46%2B00%3A00`
+            - Decoded: `2023-10-26T14:27:46+00:00`
+      name: end_date
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/iso_datetime'
+    billing_group_by:
+      description: >
+        Dimension ID(s) by which to group the results. This is a multi-value
+        query parameter, pass it more than once to specify multiple values.
+          -  When using this form: `Region` and `Tag:Name`
+          -  When using HTTP URL: `&group_by=Region&group_by=Tag:Name`
+      name: group_by
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/dimension_id'
+    billing_filters:
+      description: >
+        An encoded JSON mapping of Dimension IDs to values by which to filter
+        the results. The keys are dimension IDs; they may be negated with a '!'
+        prefix. For a list of the Dimension IDs, see the [CostDefinition
+        Language
+        Reference](https://docs.cloudzero.com/docs/cfdl-reference#source-dimensions).
+          - When using this form (Do not encode):
+            - `{"Region": ["us-east-1"], "!Account": ["123456789012"]}`
+          - When using HTTP URL (This must be encoded!):
+            - Encoded: `%26filters%3D%7B%22Region%22%3A%20%5B%22us-east-1%22%5D%2C%20%22%21Account%22%3A%20%5B%22123456789012%22%5D%7D`
+            - Decoded: `&filters={"Region": ["us-east-1"], "!Account": ["123456789012"]}`
+      name: filters
+      in: query
+      required: false
+      schema:
+        type: string
+  responses:
+    notFoundError:
+      description: Not Found Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/error'
+    forbiddenError:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+    badRequestError:
+      description: Bad Request Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/error'
+    rateLimitError:
+      description: Rate Limit Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/error'
+    requestEntityTooLargeError:
+      description: Request Entity Too Large Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+    expiredCacheError:
+      description: Expired Cache Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/error'
+    badCostFormationDefinitionVersionCreateRequestError:
+      description: Bad CloudZero CostFormation Definition Version Create Request Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: >-
+                  #/components/schemas/costformation_definition_version_create_request_error
+  schemas:
+    text_plain:
+      type: string
+    nullable_string:
+      type:
+        - string
+        - null
+    nullable_number:
+      type:
+        - number
+        - null
+    error:
+      type: object
+      properties:
+        message:
+          type: string
+        type:
+          type: string
+    currency:
+      description: String representation of a dollar amount
+      type: string
+      pattern: ^\d+(\.\d{1,})?$
+      default: '1.0'
+    currency_in:
+      description: String or float representation of a dollar amount
+      oneOf:
+        - $ref: '#/components/schemas/currency'
+        - type: number
+          format: float
+    epoch:
+      description: String representation of an epoch (UTC timestamp)
+      type: string
+      pattern: ^\d+(\.\d{1,})?$
+    iso_datetime:
+      description: ISO 8601 datetime string (e.g., 2023-10-26T14:27:46+00:00)
+      type: string
+      pattern: ^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$
+      default: '2025-01-01T00:00:00Z'
+    dimension_id:
+      description: >
+        Identifier of a CloudZero Dimension, as used in the CostFormation
+        language.
+
+        See https://docs.cloudzero.com/docs/dimensions for details.
+      type: string
+    multipart_form_data_files:
+      type: object
+      properties:
+        file:
+          type: array
+          items: {}
+    with_id:
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
+    with_uri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+      required:
+        - uri
+    with_version:
+      type: object
+      properties:
+        version:
+          type: string
+      required:
+        - version
+    with_created:
+      type: object
+      properties:
+        created:
+          description: UTC timestamp for the creation of this entity
+          $ref: '#/components/schemas/epoch'
+      required:
+        - created
+    with_last_updated:
+      type: object
+      properties:
+        last_updated:
+          description: UTC timestamp for the last update of this entity
+          $ref: '#/components/schemas/epoch'
+      required:
+        - last_updated
+    with_last_edited:
+      type: object
+      properties:
+        last_edited:
+          description: ISO datetime string for the last edit of this entity
+          $ref: '#/components/schemas/iso_datetime'
+      required:
+        - last_edited
+    with_last_updated_opt:
+      type: object
+      properties:
+        last_updated:
+          description: UTC timestamp for the last update of this entity
+          $ref: '#/components/schemas/epoch'
+    with_last_updated_by_opt:
+      type: object
+      properties:
+        last_updated_by:
+          description: email, username, or api key that created this entity (optional)
+          type: string
+    pagination:
+      description: Supports programmatic pagination
+      type: object
+      properties:
+        page_count:
+          type: integer
+          format: int32
+        item_count:
+          type: integer
+          format: int32
+        total_count:
+          type: integer
+          format: int32
+        cursor:
+          type: object
+          properties:
+            next_cursor:
+              $ref: '#/components/schemas/nullable_string'
+            previous_cursor:
+              $ref: '#/components/schemas/nullable_string'
+            has_next:
+              type: boolean
+            has_previous:
+              type: boolean
+    sorting:
+      description: |
+        This response key contains sorting options, where:
+          - `available`: is an object with two keys:
+              - `sort_keys`: list of available sort keys
+              - `sort_orders`: list of available sort orders
+          - `current`: is an array of `{sort_key: sort_order}` objects, the response is sorted in order of this array
+      example:
+        available:
+          sort_keys:
+            - last_updated
+          sort_orders:
+            - asc
+            - desc
+    sort_order:
+      type: string
+      enum:
+        - asc
+        - desc
+    sort_orders:
+      type: array
+      items:
+        $ref: '#/components/schemas/sort_order'
+      example:
+        - asc
+        - desc
+    filtering:
+      description: |
+        This response key contains filtering options, where:
+          - `available`: is an array of filterable field objects
+          - `current`: is an object containing the currently filtered fields and the filter values
+      type: object
+      properties:
+        available:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              valid_values:
+                type: array
+              valid_types:
+                type: array
+                items: string
+        current:
+          type: object
+          additionalProperties:
+            type: array
+    ActualSortOptions:
+      properties:
+        sort_key:
+          $ref: '#/components/schemas/SortKeyEnum'
+          description: The current sort key
+          default: cost_impact_last_30_days
+        sort_order:
+          $ref: '#/components/schemas/SortOrderEnum'
+          description: The current sort order
+          default: desc
+      type: object
+      title: ActualSortOptions
+    AvailableSortOptions:
+      properties:
+        sort_keys:
+          items:
+            $ref: '#/components/schemas/SortKeyEnum'
+          type: array
+          title: Sort Keys
+          description: The available sort keys
+        sort_orders:
+          items:
+            $ref: '#/components/schemas/SortOrderEnum'
+          type: array
+          title: Sort Orders
+          description: The available sort orders
+      type: object
+      title: AvailableSortOptions
+    Comment:
+      properties:
+        comment_id:
+          type: string
+          title: Comment Id
+          description: The ID of the comment
+        message:
+          type: string
+          title: Message
+          description: The message of the comment
+        item_type:
+          type: string
+          title: Item Type
+          description: The type of the item
+        item_id:
+          type: string
+          title: Item Id
+          description: The ID of the item
+        author_user_id:
+          type: string
+          title: Author User Id
+          description: The ID of the user who created the comment
+        author_email:
+          type: string
+          title: Author Email
+          description: The email of the user who created the comment
+        created_ts:
+          type: integer
+          title: Created Ts
+          description: The timestamp of when the comment was created
+        updated_ts:
+          type: integer
+          title: Updated Ts
+          description: The timestamp of when the comment was updated
+      type: object
+      required:
+        - comment_id
+        - message
+        - item_type
+        - item_id
+        - author_user_id
+        - author_email
+        - created_ts
+        - updated_ts
+      title: Comment
+      description: A class representing a comment on a recommendation
+    CreateCommentBody:
+      properties:
+        recommendation_ids:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Recommendation Ids
+          description: One or more IDs for the recommendations to add the comment to
+        message:
+          type: string
+          minLength: 1
+          title: Message
+          description: The comment to add to the recommendations
+      additionalProperties: false
+      type: object
+      required:
+        - recommendation_ids
+        - message
+      title: CreateCommentBody
+    CreateCommentResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: The message of the comment
+        recommendation_ids:
+          items:
+            type: string
+          type: array
+          title: Recommendation Ids
+          description: The IDs of the recommendations that the comment was added to
+        created_ts:
+          type: integer
+          title: Created Ts
+          description: The timestamp of the comment
+          default: 0
+      type: object
+      required:
+        - message
+      title: CreateCommentResponse
+    CursorResponse:
+      properties:
+        next_cursor:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Next Cursor
+          description: >-
+            The cursor to use to paginate the recommendations. This cursor
+            should be used as the cursor parameter in the next request to get
+            the next page of recommendations.
+        previous_cursor:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Previous Cursor
+          description: >-
+            The cursor to use to paginate the recommendations. This cursor
+            should be used as the cursor parameter in the previous request to
+            get the previous page of recommendations.
+        has_next:
+          type: boolean
+          title: Has Next
+          description: Whether there is a next page of recommendations
+          default: false
+        has_previous:
+          type: boolean
+          title: Has Previous
+          description: Whether there is a previous page of recommendations
+          default: false
+      type: object
+      title: CursorResponse
+    DeleteCommentResponse:
+      properties:
+        comment_id:
+          type: string
+          title: Comment Id
+          description: The ID of the comment that was deleted
+      type: object
+      required:
+        - comment_id
+      title: DeleteCommentResponse
+    Effort:
+      type: string
+      enum:
+        - not_set
+        - low
+        - medium
+        - high
+      title: Effort
+    FilterOptions:
+      properties:
+        available:
+          additionalProperties: true
+          type: object
+          title: Available
+          description: The available filter options
+        current:
+          additionalProperties: true
+          type: object
+          title: Current
+          description: The current filter options
+      type: object
+      title: FilterOptions
+    GetRecommendationResponse:
+      properties:
+        recommendation:
+          $ref: '#/components/schemas/RecommendationDetails'
+          description: The recommendation
+        columns:
+          items:
+            type: string
+          type: array
+          title: Columns
+          description: The columns in the response
+        display_names:
+          additionalProperties:
+            type: string
+          type: object
+          title: Display Names
+          description: A mapping of column names to display names
+        multiple_value_columns:
+          items:
+            type: string
+          type: array
+          title: Multiple Value Columns
+          description: Columns in the response that are an array of values
+      type: object
+      required:
+        - recommendation
+      title: GetRecommendationResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ListCommentsResponse:
+      properties:
+        recommendation_id:
+          type: string
+          title: Recommendation Id
+          description: The ID of the recommendation
+        comments:
+          items:
+            $ref: '#/components/schemas/Comment'
+          type: array
+          title: Comments
+          description: The comments for the recommendation
+      type: object
+      required:
+        - recommendation_id
+      title: ListCommentsResponse
+    ListRecommendationsResponse:
+      properties:
+        recommendations:
+          items:
+            $ref: '#/components/schemas/Recommendation'
+          type: array
+          title: Recommendations
+          description: The recommendations
+        sorting:
+          $ref: '#/components/schemas/SortOptions'
+          description: The sorting options
+          default:
+            available:
+              sort_keys: []
+              sort_orders: []
+            current:
+              sort_key: cost_impact_last_30_days
+              sort_order: desc
+        filtering:
+          $ref: '#/components/schemas/FilterOptions'
+          description: The filtering options
+          default:
+            available: {}
+            current: {}
+        columns:
+          items:
+            type: string
+          type: array
+          title: Columns
+          description: The columns in the response
+        multiple_value_columns:
+          items:
+            type: string
+          type: array
+          title: Multiple Value Columns
+          description: Columns in the response that are an array of values
+        display_names:
+          additionalProperties:
+            type: string
+          type: object
+          title: Display Names
+          description: A mapping of column names to display names
+        pagination:
+          $ref: '#/components/schemas/PaginationResponse'
+          description: Pagination information
+          default:
+            page_count: 0
+            item_count: 0
+            total_count: 0
+            cursor:
+              has_next: false
+              has_previous: false
+              next_cursor: null
+              previous_cursor: null
+      type: object
+      title: ListRecommendationsResponse
+    MutableRecommendationFields:
+      properties:
+        effort:
+          anyOf:
+            - $ref: '#/components/schemas/Effort'
+            - type: 'null'
+        status:
+          anyOf:
+            - $ref: '#/components/schemas/Status'
+            - type: 'null'
+      additionalProperties: false
+      type: object
+      title: MutableRecommendationFields
+    PaginationResponse:
+      properties:
+        page_count:
+          type: integer
+          title: Page Count
+          description: The total number of pages available
+          default: 0
+        item_count:
+          type: integer
+          title: Item Count
+          description: The number of items in the current page
+          default: 0
+        total_count:
+          type: integer
+          title: Total Count
+          description: The total number of items available
+          default: 0
+        cursor:
+          $ref: '#/components/schemas/CursorResponse'
+          description: Pagination cursor information
+          default:
+            next_cursor: null
+            previous_cursor: null
+            has_next: false
+            has_previous: false
+      type: object
+      title: PaginationResponse
+    Recommendation:
+      properties:
+        recommendation_id:
+          type: string
+          title: Recommendation Id
+          description: The ID of the recommendation
+        title:
+          type: string
+          title: Title
+          description: The title of the recommendation
+        category:
+          type: string
+          title: Category
+          description: The category of the recommendation
+          examples:
+            - optimization
+        optimization_id:
+          type: string
+          title: Optimization Id
+          description: The optimization type ID
+          examples:
+            - CIR-AWS-00216
+        source:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Source
+          description: The source of the recommendation
+          examples:
+            - CloudZero
+            - 'AWS: Trusted Advisor'
+        effort:
+          type: string
+          title: Effort
+          description: The effort of the recommendation
+          default: not_set
+          examples:
+            - not_set
+            - low
+            - medium
+            - high
+        status:
+          type: string
+          title: Status
+          description: The status of the recommendation
+          default: not_started
+          examples:
+            - not_started
+            - in_progress
+            - addressed
+            - ignored
+        work_item:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Work Item
+          description: >-
+            The ID of a work item associated with a configured ticketing system
+            like Jira, etc.
+        cost_impact_last_30_days:
+          type: number
+          title: Cost Impact Last 30 Days
+          description: The cost impact of the recommendation over the last 30 days
+          default: 0
+        realized_savings_last_30_days:
+          type: number
+          title: Realized Savings Last 30 Days
+          description: The realized savings of the recommendation over the last 30 days
+          default: 0
+        resource:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource
+          description: The resource that this recommendation is about
+        resource_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource Type
+          description: The type of the resource
+        resource_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource Name
+          description: The name of the resource
+        account:
+          items:
+            type: string
+          type: array
+          title: Account
+          description: The cloud provider account of the recommendation
+        addressed_on_ts:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Addressed On Ts
+          description: The timestamp of when the recommendation was addressed
+        cloud_provider:
+          items:
+            type: string
+          type: array
+          title: Cloud Provider
+          description: The cloud provider of the recommendation
+        region:
+          items:
+            type: string
+          type: array
+          title: Region
+          description: The cloud provider region of the recommendation
+        service:
+          items:
+            type: string
+          type: array
+          title: Service
+          description: The cloud provider service of the recommendation
+      additionalProperties: true
+      type: object
+      required:
+        - recommendation_id
+        - title
+        - category
+        - optimization_id
+      title: Recommendation
+    RecommendationDetails:
+      properties:
+        recommendation_id:
+          type: string
+          title: Recommendation Id
+          description: The ID of the recommendation
+        title:
+          type: string
+          title: Title
+          description: The title of the recommendation
+        category:
+          type: string
+          title: Category
+          description: The category of the recommendation
+          examples:
+            - optimization
+        optimization_id:
+          type: string
+          title: Optimization Id
+          description: The optimization type ID
+          examples:
+            - CIR-AWS-00216
+        source:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Source
+          description: The source of the recommendation
+          examples:
+            - CloudZero
+            - 'AWS: Trusted Advisor'
+        effort:
+          type: string
+          title: Effort
+          description: The effort of the recommendation
+          default: not_set
+          examples:
+            - not_set
+            - low
+            - medium
+            - high
+        status:
+          type: string
+          title: Status
+          description: The status of the recommendation
+          default: not_started
+          examples:
+            - not_started
+            - in_progress
+            - addressed
+            - ignored
+        work_item:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Work Item
+          description: >-
+            The ID of a work item associated with a configured ticketing system
+            like Jira, etc.
+        cost_impact_last_30_days:
+          type: number
+          title: Cost Impact Last 30 Days
+          description: The cost impact of the recommendation over the last 30 days
+          default: 0
+        realized_savings_last_30_days:
+          type: number
+          title: Realized Savings Last 30 Days
+          description: The realized savings of the recommendation over the last 30 days
+          default: 0
+        resource:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource
+          description: The resource that this recommendation is about
+        resource_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource Type
+          description: The type of the resource
+        resource_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Resource Name
+          description: The name of the resource
+        account:
+          items:
+            type: string
+          type: array
+          title: Account
+          description: The cloud provider account of the recommendation
+        addressed_on_ts:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Addressed On Ts
+          description: The timestamp of when the recommendation was addressed
+        cloud_provider:
+          items:
+            type: string
+          type: array
+          title: Cloud Provider
+          description: The cloud provider of the recommendation
+        region:
+          items:
+            type: string
+          type: array
+          title: Region
+          description: The cloud provider region of the recommendation
+        service:
+          items:
+            type: string
+          type: array
+          title: Service
+          description: The cloud provider service of the recommendation
+        last_seen_ts:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Last Seen Ts
+          description: The timestamp of when the recommendation was last seen
+        suggested_actions:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Suggested Actions
+          description: The suggested actions of the recommendation
+        metadata:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Metadata
+          description: The metadata of the recommendation
+        insight_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Insight Type
+          description: The type of the recipe
+      additionalProperties: true
+      type: object
+      required:
+        - recommendation_id
+        - title
+        - category
+        - optimization_id
+      title: RecommendationDetails
+    SortKeyEnum:
+      type: string
+      enum:
+        - cost_impact_last_30_days
+      title: SortKeyEnum
+    SortOptions:
+      properties:
+        available:
+          $ref: '#/components/schemas/AvailableSortOptions'
+          description: The available sort options
+          default:
+            sort_keys: []
+            sort_orders: []
+        current:
+          $ref: '#/components/schemas/ActualSortOptions'
+          description: The current sort options
+          default:
+            sort_key: cost_impact_last_30_days
+            sort_order: desc
+      type: object
+      title: SortOptions
+    SortOrderEnum:
+      type: string
+      enum:
+        - desc
+      title: SortOrderEnum
+    Status:
+      type: string
+      enum:
+        - not_started
+        - in_progress
+        - addressed
+        - ignored
+      title: Status
+    UpdateCommentBody:
+      properties:
+        message:
+          type: string
+          minLength: 1
+          title: Message
+          description: The message to update the comment on the recommendations
+      additionalProperties: false
+      type: object
+      required:
+        - message
+      title: UpdateCommentBody
+    UpdateCommentResponse:
+      properties:
+        comment:
+          $ref: '#/components/schemas/Comment'
+          description: The updated comment
+      type: object
+      required:
+        - comment
+      title: UpdateCommentResponse
+    UpdateRecommendationBody:
+      properties:
+        recommendation_ids:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Recommendation Ids
+        updates:
+          $ref: '#/components/schemas/MutableRecommendationFields'
+        reason:
+          anyOf:
+            - type: string
+              maxLength: 256
+            - type: 'null'
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+        - recommendation_ids
+        - updates
+      title: UpdateRecommendationBody
+    UpdateRecommendationResponse:
+      properties:
+        recommendation_ids:
+          items:
+            type: string
+          type: array
+          title: Recommendation Ids
+          description: The IDs of the recommendations that were updated
+        updates:
+          additionalProperties: true
+          type: object
+          title: Updates
+          description: The updates that were made to the recommendations
+        reason:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Reason
+          description: The reason for the update
+        status:
+          type: string
+          title: Status
+          description: The status of the update operation
+          default: not_started
+        updated_ts:
+          type: integer
+          title: Updated Ts
+          description: The timestamp of the update
+          default: 0
+      type: object
+      title: UpdateRecommendationResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+    ResponseValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: ResponseValidationError
+    insight_new:
+      type: object
+      properties:
+        effort:
+          type: string
+          enum:
+            - not_set
+            - low
+            - medium
+            - high
+        cost_impact:
+          $ref: '#/components/schemas/currency_in'
+        status:
+          type: string
+          enum:
+            - new
+            - in_progress
+            - on_hold
+            - addressed
+            - ignored
+        category:
+          type: string
+        link:
+          type: string
+        description:
+          type: string
+        title:
+          type: string
+    insight:
+      allOf:
+        - $ref: '#/components/schemas/insight_new'
+        - $ref: '#/components/schemas/with_id'
+        - $ref: '#/components/schemas/with_created'
+        - $ref: '#/components/schemas/with_last_updated'
+        - type: object
+          properties:
+            cost_impact:
+              $ref: '#/components/schemas/currency'
+    insights:
+      type: array
+      items:
+        $ref: '#/components/schemas/insight'
+    insight_sort_keys:
+      description: Sortable Insight properties
+      type: string
+      enum:
+        - category
+        - cost_impact
+        - effort
+        - last_updated
+        - status
+        - title
+    insight_hide_resolved_filter:
+      description: Prefer filtering by Status.
+      type: boolean
+    insight_status_options:
+      type: array
+      items:
+        type: string
+        enum:
+          - new
+          - in_progress
+          - on_hold
+          - addressed
+          - ignored
+    insight_effort_options:
+      type: array
+      items:
+        type: string
+        enum:
+          - not_set
+          - low
+          - medium
+          - high
+    insight_filter_by_status:
+      description: >
+        If passed, query will be filtered by the properties specified.
+
+        This is a multi-value query parameter, pass it more than once to specify
+        multiple values, e.g.
+          - `&status=new&status=in_progress`
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/insight_status_options'
+    insight_filter_by_effort:
+      description: >
+        If passed, query will be filtered by the properties specified.
+
+        This is a multi-value query parameter, pass it more than once to specify
+        multiple values, e.g.
+          - `&effort=low&effort=medium`
+      name: effort
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/insight_effort_options'
+    insight_sorting:
+      allOf:
+        - $ref: '#/components/schemas/sorting'
+        - type: object
+          properties:
+            available:
+              type: object
+              properties:
+                sort_keys:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/insight_sort_keys'
+                  example:
+                    - category
+                    - cost_impact
+                    - effort
+                    - last_updated
+                    - status
+                    - title
+                sort_orders:
+                  $ref: '#/components/schemas/sort_orders'
+            current:
+              type: array
+              items:
+                type: object
+                properties:
+                  sort_key:
+                    $ref: '#/components/schemas/insight_sort_keys'
+                  sort_order:
+                    $ref: '#/components/schemas/sort_order'
+    insight_filtering:
+      allOf:
+        - $ref: '#/components/schemas/filtering'
+        - example:
+            available:
+              - field: hide_resolved
+                valid_values:
+                  - true
+                  - false
+                valid_types:
+                  - boolean
+            current:
+              hide_resolved:
+                - false
+    comment:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/comment_new'
+        - $ref: '#/components/schemas/with_id'
+        - $ref: '#/components/schemas/with_created'
+        - $ref: '#/components/schemas/with_last_updated'
+        - type: object
+          properties:
+            author:
+              type: string
+            insight:
+              $ref: '#/components/schemas/with_id'
+          required:
+            - author
+            - insight
+    comment_new:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    comments:
+      type: array
+      items:
+        $ref: '#/components/schemas/comment'
+    budgets_granularity:
+      description: Supported periods, e.g. "monthly"
+      type: string
+      enum:
+        - monthly
+    budgets_cost_type:
+      description: >
+        Type of charges included in the cost calculation, currently supports the
+        following values:
+          `real_cost`: filters your bill to only display charges directly related to consumption
+      type: string
+      enum:
+        - real_cost
+    budget:
+      allOf:
+        - $ref: '#/components/schemas/budget_new'
+        - $ref: '#/components/schemas/with_id'
+        - $ref: '#/components/schemas/with_created'
+        - $ref: '#/components/schemas/with_last_updated'
+        - type: object
+          properties:
+            cost_type:
+              $ref: '#/components/schemas/budgets_cost_type'
+            granularity:
+              $ref: '#/components/schemas/budgets_granularity'
+          required:
+            - cost_type
+            - granularity
+    budget_current_expanded:
+      allOf:
+        - $ref: '#/components/schemas/budget'
+        - type: object
+          properties:
+            current:
+              $ref: '#/components/schemas/budget_current'
+          required:
+            - current
+    budget_fully_expanded:
+      allOf:
+        - $ref: '#/components/schemas/budget_current_expanded'
+        - type: object
+          properties:
+            burnup:
+              $ref: '#/components/schemas/budget_burnup'
+          required:
+            - burnup
+        - type: object
+          properties:
+            history:
+              $ref: '#/components/schemas/budget_history'
+          required:
+            - history
+    budget_maybe_current_expanded:
+      anyOf:
+        - $ref: '#/components/schemas/budget'
+        - $ref: '#/components/schemas/budget_current_expanded'
+    budget_maybe_fully_expanded:
+      anyOf:
+        - $ref: '#/components/schemas/budget'
+        - $ref: '#/components/schemas/budget_fully_expanded'
+    budget_alerts:
+      description: |
+        Mapping of `1-100` to `Y/N`, where
+          - `1-100` is the percentage of the budget at which to send an alert
+          - `Y/N` is whether or not to send the alert
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/budget_alerts_value'
+      example:
+        '80': 'N'
+        '100': 'Y'
+    budget_alerts_value:
+      type: string
+      enum:
+        - 'Y'
+        - 'N'
+    budget_new:
+      type: object
+      properties:
+        name:
+          description: Budget name, must be unique within a View
+          type: string
+        planned_limits:
+          $ref: '#/components/schemas/budget_planned_limits'
+        view:
+          description: View associated with this Budget
+          $ref: '#/components/schemas/with_id'
+        alerts:
+          $ref: '#/components/schemas/budget_alerts'
+      required:
+        - name
+        - planned_limits
+        - view
+    budget_update:
+      type: object
+      properties:
+        name:
+          description: Budget name, must be unique within a View
+          type: string
+        planned_limits:
+          $ref: '#/components/schemas/budget_planned_limits'
+        view:
+          description: View associated with this Budget
+          $ref: '#/components/schemas/with_id'
+        alerts:
+          $ref: '#/components/schemas/budget_alerts'
+    budget_get_all_expand:
+      type: array
+      items:
+        type: string
+        enum:
+          - current
+    budget_get_one_expand:
+      type: array
+      items:
+        type: string
+        enum:
+          - current
+          - history
+          - burnup
+    budget_planned_actual:
+      type: object
+      properties:
+        actual:
+          type: string
+        planned:
+          type: string
+      required:
+        - actual
+        - planned
+    budget_burnup:
+      type: object
+      properties:
+        daily:
+          $ref: '#/components/schemas/budget_date_planned_actual'
+      required:
+        - daily
+    budget_current:
+      $ref: '#/components/schemas/budget_planned_actual'
+    budget_history:
+      type: object
+      properties:
+        monthly:
+          $ref: '#/components/schemas/budget_date_planned_actual'
+        quarterly:
+          $ref: '#/components/schemas/budget_date_planned_actual'
+      required:
+        - monthly
+        - quarterly
+    budget_date_planned_actual:
+      type: object
+      patternProperties:
+        ^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?)?$:
+          $ref: '#/components/schemas/budget_planned_actual'
+    budget_sorting:
+      allOf:
+        - $ref: '#/components/schemas/sorting'
+        - type: object
+          properties:
+            available:
+              type: object
+              properties:
+                sort_keys:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/budget_sort_keys'
+                  example:
+                    - last_updated
+                    - name
+                sort_orders:
+                  $ref: '#/components/schemas/sort_orders'
+            current:
+              type: array
+              items:
+                type: object
+                properties:
+                  sort_key:
+                    $ref: '#/components/schemas/budget_sort_keys'
+                  sort_order:
+                    $ref: '#/components/schemas/sort_order'
+    budget_sort_keys:
+      description: Sortable Budget properties
+      type: string
+      enum:
+        - last_updated
+        - name
+    budget_filtering:
+      allOf:
+        - $ref: '#/components/schemas/filtering'
+    budget_planned_limits:
+      description: >
+        Mapping of `period` to planned budget limits for the given period.
+        Supported `period`s are:
+          - `monthly`
+      type: object
+      properties:
+        monthly:
+          $ref: '#/components/schemas/budget_planned_limit'
+      required:
+        - monthly
+      example:
+        monthly:
+          '2022-02-01T00:00:00+00:00':
+            amount: '1000.00'
+    budget_planned_limit:
+      description: |
+        Planned limit as a mapping of `date` to `amount`, where
+          - `date` is an timezone aware ISO Formatted string, e.g. `"2022-02-01T00:00:00+00:00"`
+          - `amount` is a Mapping of the literal string `"amount"` to a dollar amount, e.g. `{"amount": "1000.00"}`
+      type: object
+      additionalProperties:
+        description: Amount for planned limit
+        type: object
+        properties:
+          amount:
+            $ref: '#/components/schemas/currency'
+        required:
+          - amount
+      example:
+        '2022-02-01T00:00:00+00:00':
+          amount: '1000.00'
+    costformation_definition_versions_sort_keys:
+      description: Sortable CloudZero CostFormation Definition Properties
+      type: string
+      enum:
+        - version
+    costformation_definition_versions_sorting:
+      allOf:
+        - $ref: '#/components/schemas/sorting'
+        - type: object
+          properties:
+            available:
+              type: object
+              properties:
+                sort_keys:
+                  type: array
+                  items:
+                    $ref: >-
+                      #/components/schemas/costformation_definition_versions_sort_keys
+                  example:
+                    - version
+                sort_orders:
+                  $ref: '#/components/schemas/sort_orders'
+            current:
+              type: array
+              items:
+                type: object
+                properties:
+                  sort_key:
+                    $ref: >-
+                      #/components/schemas/costformation_definition_versions_sort_keys
+                  sort_order:
+                    $ref: '#/components/schemas/sort_order'
+    costformation_definition_versions_filtering:
+      allOf:
+        - $ref: '#/components/schemas/filtering'
+    costformation_definition_version:
+      allOf:
+        - $ref: '#/components/schemas/with_version'
+        - $ref: '#/components/schemas/with_last_updated_opt'
+        - $ref: '#/components/schemas/with_last_updated_by_opt'
+    costformation_definition_version_with_url:
+      allOf:
+        - $ref: '#/components/schemas/costformation_definition_version'
+        - $ref: '#/components/schemas/with_uri'
+    costformation_definition_versions:
+      type: array
+      items:
+        $ref: '#/components/schemas/costformation_definition_version'
+    costformation_definition_versions_dsl_error:
+      type: object
+      properties:
+        error:
+          type: string
+        value:
+          type: string
+        path:
+          type: array
+          items:
+            type: string
+    costformation_definition_versions_dsl_errors:
+      type: array
+      items:
+        $ref: '#/components/schemas/costformation_definition_versions_dsl_error'
+    costformation_definition_version_create_request_error:
+      allOf:
+        - $ref: '#/components/schemas/error'
+        - type: object
+          properties:
+            errors:
+              $ref: >-
+                #/components/schemas/costformation_definition_versions_dsl_errors
+    views:
+      type: array
+      items:
+        $ref: '#/components/schemas/view'
+    view:
+      allOf:
+        - $ref: '#/components/schemas/view_new'
+        - $ref: '#/components/schemas/with_id'
+        - $ref: '#/components/schemas/with_last_updated'
+    view_new:
+      type: object
+      properties:
+        name:
+          description: View name
+          type: string
+        filter:
+          $ref: '#/components/schemas/view_filter'
+        connections:
+          $ref: '#/components/schemas/view_connections'
+        principal_dimension:
+          $ref: '#/components/schemas/view_principal_dimension'
+        anomalies:
+          $ref: '#/components/schemas/view_anomalies'
+      required:
+        - name
+        - principal_dimension
+        - connections
+        - filter
+    view_update:
+      type: object
+      properties:
+        name:
+          description: View name
+          type: string
+        filter:
+          $ref: '#/components/schemas/view_filter'
+        connections:
+          $ref: '#/components/schemas/view_connections'
+        principal_dimension:
+          $ref: '#/components/schemas/view_principal_dimension'
+        anomalies:
+          $ref: '#/components/schemas/view_anomalies'
+    view_create_update_response:
+      type: object
+      properties:
+        view:
+          allOf:
+            - $ref: '#/components/schemas/view'
+            - $ref: '#/components/schemas/with_last_edited'
+    view_anomalies:
+      type: object
+      description: >
+        Anomalies configuration for the view. These fields are used to configure
+        the anomaly detection for the view.
+
+        Anomalies are detected by comparing the cost of a given day to the cost
+        of the previous day.
+
+        If the cost of the current day is greater than or equal to the
+        threshold, an anomaly event will be generated.
+
+        The anomaly event will be sent to the configured connections for the
+        view.
+
+        The following fields are used to configure the anomaly detection:
+      properties:
+        enabled:
+          description: |
+            Specifies whether or not to enable anomaly detection for the view.
+              `true` (Default): anomaly detection is enabled for the view
+              `false`: anomaly detection is disabled for the view
+          type: boolean
+        threshold_type:
+          $ref: '#/components/schemas/view_anomalies_threshold_type'
+        threshold_value:
+          $ref: '#/components/schemas/view_anomalies_threshold_value'
+    view_anomalies_threshold_type:
+      description: >
+        Type of threshold to use when detecting anomalies within this view. This
+        field, combined with the `threshold_value`
+
+        field sets the threshold for anomalies detected within this view. The
+        threshold is used to determine if a day to day
+
+        cost spike is considered an anomaly. The cost spike  must be greater
+
+        or equal to the threshold in order generate an anomaly event. The
+        following values are currently supported:
+          `Automatic`: the threshold will be automatically calculated using a sliding scale based on the view's cost
+          `Percent`: the threshold will be a percentage of the view's cost
+      type: string
+      enum:
+        - Automatic
+        - Percent
+    view_anomalies_threshold_value:
+      description: >
+        Value of the threshold to apply to anomalies for the specified view. The
+        value is interpreted based on the `threshold_type`:
+          `Automatic`: threshold_value is ignored when the threshold type is `Automatic`
+          `Percent`: threshold_value is the percentage of the view's cost to use as the threshold
+      type: integer
+    view_connections:
+      description: Contains the connections that will receive notifications for this view
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/view_connections_email'
+        slack:
+          type: array
+          items:
+            $ref: '#/components/schemas/view_connections_slack'
+    view_connections_email:
+      description: Email Connection
+      type: object
+      properties:
+        addresses:
+          description: List of email addresses to notify
+          type: array
+          items:
+            type: string
+        include_all_organizers:
+          description: >-
+            Whether or not to additionally notifiy all organizers in the
+            organization
+          type: boolean
+    view_connections_slack:
+      description: Slack Connection
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+    view_filter:
+      description: Filter mapping of dimension name to allowed values
+      type: object
+      additionalProperties:
+        description: filters
+        type: array
+        items:
+          type: string
+      example:
+        accounts:
+          - '123456789012'
+    view_principal_dimension:
+      description: primary group by dimension for the view
+      type: string
+    view_sort_keys:
+      description: Sortable View properties
+      type: string
+      enum:
+        - last_updated
+    view_sorting:
+      allOf:
+        - $ref: '#/components/schemas/sorting'
+        - type: object
+          properties:
+            available:
+              type: object
+              properties:
+                sort_keys:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/view_sort_keys'
+                  example:
+                    - last_updated
+                sort_orders:
+                  $ref: '#/components/schemas/sort_orders'
+            current:
+              type: array
+              items:
+                type: object
+                properties:
+                  sort_key:
+                    $ref: '#/components/schemas/view_sort_keys'
+                  sort_order:
+                    $ref: '#/components/schemas/sort_order'
+    view_filtering:
+      allOf:
+        - $ref: '#/components/schemas/filtering'
+    anycost_stream_connection_billing_drop_summaries:
+      type: array
+      items:
+        $ref: '#/components/schemas/anycost_stream_connection_billing_drop_summary'
+    anycost_stream_connection_billing_drop_summary:
+      type: object
+      properties:
+        drop_id:
+          type: string
+        month:
+          $ref: '#/components/schemas/iso_datetime'
+        row_count:
+          type: integer
+    anycost_stream_connection_validate_billing_drop_summary:
+      type: object
+      properties:
+        is_valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+    anycost_stream_connection_billing_drop:
+      type: object
+      properties:
+        month:
+          $ref: '#/components/schemas/iso_datetime'
+        operation:
+          description: >
+            The type of operation to perform on the data.
+
+            - `replace_drop`: Replace the data with the new data.
+
+            - `replace_hourly`: Replace the data that have overlapping hours
+            with the new data
+
+            - `sum`: Append data to the existing data
+
+            If no prior data exists, a new drop with `data` will be created
+          type: string
+          default: replace_drop
+          enum:
+            - replace_drop
+            - replace_hourly
+            - sum
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/cbf_row'
+      required:
+        - data
+    cbf_row:
+      description: >-
+        https://docs.cloudzero.com/docs/anycost-common-bill-format-cbf#data-file-columns
+      type: object
+      properties:
+        lineitem/id:
+          type: string
+        lineitem/type:
+          type: string
+          default: Usage
+          enum:
+            - Usage
+            - Tax
+            - Support
+            - Purchase
+            - CommittedUsePurchase
+            - Discount
+            - Credit
+            - Fee
+            - Adjustment
+        lineitem/description:
+          type: string
+        time/usage_start:
+          $ref: '#/components/schemas/iso_datetime'
+        time/usage_end:
+          $ref: '#/components/schemas/iso_datetime'
+        resource/id:
+          type: string
+        resource/service:
+          type: string
+        resource/account:
+          type: string
+        resource/region:
+          type: string
+        resource/usage_family:
+          type: string
+        action/operation:
+          type: string
+        action/usage_type:
+          type: string
+        action/region:
+          type: string
+        action/account:
+          type: string
+        usage/amount:
+          type: string
+          pattern: ^\d+(\.\d{1,})?$
+          default: '1.0'
+        usage/units:
+          type: string
+          default: '1'
+        cost/cost:
+          $ref: '#/components/schemas/currency'
+        cost/discounted_cost:
+          $ref: '#/components/schemas/currency'
+        cost/amortized_cost:
+          $ref: '#/components/schemas/currency'
+        cost/discounted_amortized_cost:
+          $ref: '#/components/schemas/currency'
+        cost/on_demand_cost:
+          $ref: '#/components/schemas/currency'
+        bill/invoice_id:
+          type: string
+        k8s/cluster:
+          type: string
+        k8s/namespace:
+          type: string
+        k8s/deployment:
+          type: string
+        k8s/labels:
+          type: string
+      patternProperties:
+        resource/tag:.+:
+          type: string
+      required:
+        - time/usage_start
+        - cost/cost
+    billing_connections:
+      type: array
+      items:
+        $ref: '#/components/schemas/billing_connection'
+    billing_connection:
+      allOf:
+        - $ref: '#/components/schemas/billing_connection_existing'
+        - $ref: '#/components/schemas/with_id'
+        - $ref: '#/components/schemas/with_created'
+        - $ref: '#/components/schemas/with_last_updated'
+    billing_connection_new:
+      type: object
+      properties:
+        name:
+          type: string
+        cloud_provider:
+          type: string
+          example:
+            - NewRelic
+            - MongoDB
+        expected_ingest_rate:
+          $ref: '#/components/schemas/nullable_number'
+        is_enabled:
+          type: boolean
+        s3_bucket_info:
+          anyOf:
+            - $ref: '#/components/schemas/s3_bucket_info_new'
+            - type: 'null'
+      required:
+        - name
+        - cloud_provider
+    s3_bucket_info_new:
+      type: object
+      properties:
+        bucket_name:
+          type: string
+          example:
+            - test-bucket
+        bucket_path:
+          type: string
+          example:
+            - path/to/data
+        cloud_account_id:
+          description: >-
+            This is the AWS Account ID with the S3 Bucket that the AnyCost
+            Adaptor will be writing Common Bill Format files into.
+          type: string
+      required:
+        - bucket_name
+        - bucket_path
+    billing_connection_update:
+      type: object
+      properties:
+        name:
+          type: string
+        expected_ingest_rate:
+          $ref: '#/components/schemas/nullable_number'
+        is_enabled:
+          type: boolean
+        s3_bucket_info:
+          anyOf:
+            - $ref: '#/components/schemas/s3_bucket_info_update'
+            - type: 'null'
+    s3_bucket_info_update:
+      type: object
+      properties:
+        bucket_name:
+          type: string
+          example:
+            - test-bucket
+        bucket_path:
+          type: string
+          example:
+            - path/to/data
+        cloud_account_id:
+          description: >-
+            This is the AWS Account ID with the S3 Bucket that the AnyCost
+            Adaptor will be writing Common Bill Format files into.
+          $ref: '#/components/schemas/nullable_string'
+    billing_connection_existing:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        connection_type:
+          type: string
+        cloud_provider:
+          type: string
+        s3_bucket_info:
+          $ref: '#/components/schemas/s3_bucket_info_new'
+        expected_ingest_rate:
+          type: number
+          format: float
+        is_enabled:
+          type: boolean
+        capabilities:
+          type: object
+        is_draft:
+          type: boolean
+        connection_id:
+          type: string
+      required:
+        - name
+        - connection_type
+        - cloud_provider
+        - s3_bucket_info
+        - expected_ingest_rate
+        - is_enabled
+        - capabilities
+        - is_draft
+        - connection_id
+    billing_connection_sort_keys:
+      description: Sortable Billing Connection properties
+      type: string
+      enum:
+        - connection_name
+        - creation_date
+        - name
+        - cloud_provider
+        - created
+        - last_updated
+        - is_enabled
+    billing_connection_sorting:
+      allOf:
+        - $ref: '#/components/schemas/sorting'
+        - type: object
+          properties:
+            available:
+              type: object
+              properties:
+                sort_keys:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/billing_connection_sort_keys'
+                  example:
+                    - last_updated
+                sort_orders:
+                  $ref: '#/components/schemas/sort_orders'
+            current:
+              type: array
+              items:
+                type: object
+                properties:
+                  sort_key:
+                    $ref: '#/components/schemas/billing_connection_sort_keys'
+                  sort_order:
+                    $ref: '#/components/schemas/sort_order'
+    billing_connection_filtering:
+      allOf:
+        - $ref: '#/components/schemas/filtering'
+    billing_granularity:
+      description: Supported periods, e.g. "daily"
+      type: string
+      enum:
+        - hourly
+        - daily
+        - weekly
+        - monthly
+        - yearly
+      default: daily
+    billing_cost_type:
+      description: https://docs.cloudzero.com/docs/explorer#cost-types
+      type: string
+      enum:
+        - billed_cost
+        - discounted_cost
+        - amortized_cost
+        - discounted_amortized_cost
+        - real_cost
+        - on_demand_cost
+        - invoiced_amortized_cost
+        - usage_amount
+      default: real_cost
+    billing_costs:
+      type: array
+      items:
+        $ref: '#/components/schemas/billing_cost'
+    billing_cost:
+      type: object
+      description: >
+        Cost for a given usage date and set of group_by dimensions.
+
+        The response will contain additional fields based on the group by
+        parameters passed in.
+
+
+        Your response will look similar to this (with `Region` group by field as
+        an example):
+
+
+         `{
+
+
+            "costs":
+
+
+              [
+
+
+                {
+                  "usage_date": "2023-10-02T21:00:00+00:00",
+                  "cost": 0,
+                  "Region": "us-east-1"
+                },
+
+
+                {
+                  "usage_date": "2023-10-02T21:00:00+00:00",
+                  "cost": 0,
+                  "Region": "us-west-1"
+                },
+
+
+                {
+                  "usage_date": "2023-10-21T21:00:00+00:00",
+                  "cost": 0,
+                  "Region": "us-east-1"
+                },
+
+
+                {
+                  "usage_date": "2023-10-22T21:00:00+00:00",
+                  "cost": 0,
+                  "Region": "us-west-1"
+                }
+
+
+              ],
+
+
+            "pagination":
+
+
+              {
+                "page_count": 1,
+                "item_count": 32,
+                "total_count": 32,
+                "cursor": {
+                  "next_cursor": null,
+                  "previous_cursor": null,
+                  "has_next": false,
+                  "has_previous": false
+                }
+              },
+
+
+            "sorting":
+
+
+              {
+                "available": {
+                  "sort_keys": [
+                    "usage_date"
+                  ],
+                  "sort_orders": [
+                    "asc"
+                  ]
+                },
+                "current": [
+                  {
+                    "sort_key": "usage_date",
+                    "sort_order": "asc"
+                  }
+                ]
+              },
+
+
+            "filtering":
+
+
+             {
+                "available": [],
+                "current": {}
+              },
+
+
+              "total_count": 32
+
+
+          }`
+      properties:
+        usage_date:
+          $ref: '#/components/schemas/iso_datetime'
+        cost:
+          type: number
+          format: float
+    billing_dimensions:
+      type: array
+      items:
+        $ref: '#/components/schemas/billing_dimension'
+    billing_dimension:
+      type: object
+      description: |
+        A CloudZero dimension available in APIs and CostFormation.
+      properties:
+        id:
+          $ref: '#/components/schemas/dimension_id'
+        name:
+          type: string
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+x-readme: {}

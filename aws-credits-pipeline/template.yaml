@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CloudZero AWS Credits Pipeline — S3 → Lambda → CloudZero AnyCost Stream
+
+Parameters:
+  CloudZeroApiKey:
+    Type: String
+    NoEcho: true
+    Description: CloudZero API key (no Bearer prefix). Settings > API Keys.
+  CloudZeroConnectionId:
+    Type: String
+    Description: CloudZero AnyCost Stream connection ID. Settings > Billing Connections.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 60
+    MemorySize: 256
+    Environment:
+      Variables:
+        CLOUDZERO_API_KEY: !Ref CloudZeroApiKey
+        CLOUDZERO_CONNECTION_ID: !Ref CloudZeroConnectionId
+
+Resources:
+  CreditsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "aws-credits-pipeline-${AWS::AccountId}-${AWS::Region}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CreditsProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: aws-credits-processor
+      CodeUri: src/
+      Handler: handler.lambda_handler
+      Description: Parses monthly credits CSV and posts to CloudZero AnyCost Stream
+      Role: !GetAtt CreditsProcessorRole.Arn
+      Events:
+        S3CreditsUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref CreditsBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: credits-
+                  - Name: suffix
+                    Value: .csv
+
+  CreditsProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "aws-credits-processor-role-${AWS::Region}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3ReadCreditsFile
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::aws-credits-pipeline-${AWS::AccountId}-${AWS::Region}/credits-*.csv"
+
+Outputs:
+  CreditsBucketName:
+    Description: S3 bucket for credits CSV uploads
+    Value: !Ref CreditsBucket
+  CreditsProcessorFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt CreditsProcessorFunction.Arn
+  CreditsProcessorFunctionName:
+    Description: Lambda function name
+    Value: !Ref CreditsProcessorFunction

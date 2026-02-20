@@ -1,0 +1,200 @@
+swagger: '2.0'
+host: api.cloudzero.com
+info:
+  description: Events API
+  version: 1.0.0
+  title: V1 API
+paths:
+  /events/v1/events:
+    post:
+      tags:
+        - events
+      summary: Post an event
+      description: >-
+        When something happens in one of your engineering systems that may have
+        an impact on your cloud costs, submit an `Event` to the CloudZero API to
+        correlate the `Event` with your ongoing cloud costs. For example, you
+        can send us an `Event` every time you do a deployment. CloudZero will
+        then correlate those deployment `Event`s with changing cloud costs to
+        help you understand what is driving said costs in any given period of
+        time.
+      operationId: postEvent
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Event to submit to CloudZero
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
+        - in: header
+          name: Authorization
+          description: >-
+            Your CloudZero [API
+            Key](https://app.cloudzero.com/organization/api-keys). **Note:**
+            This is not a bearer token, and should appear in the header as
+            `Authorization`: `<cloudzero-api-key>`
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Event created
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid event, make sure your event conforms to the schema
+        '403':
+          description: >-
+            Not authorized, make sure you're using a valid API key in the header
+            `Authorization`
+definitions:
+  Event:
+    description: >-
+      A singular event should represent something interesting that happened at a
+      point in time in one of your engineering systems.  It should capture the
+      relevant information to help you understand what happened when correlating
+      an event with cloud costs.
+    type: object
+    required:
+      - title
+      - source
+    properties:
+      title:
+        type: string
+        maxLength: 256
+        default: api-docs-test-event
+        description: >-
+          The title of the event, which will generally be the main string shown
+          in the UI.
+
+          **Example:** production-feature-deployed
+        example: production-feature-deployed
+      source:
+        type: string
+        default: cloudzero-api-docs
+        maxLength: 256
+        description: |-
+          The system from which the event originates
+          **Example:** jenkins
+        example: jenkins
+      timestamp:
+        type: string
+        description: >-
+          An ISO date string of when the event occurred. If you do not provide
+          the timestamp, CloudZero will automatically generate the timestamp at
+          the time the event is POSTed. User-provided timestamps are more
+          accurate. *Note: must be in UTC*
+
+          **Example:** 2020-03-03T15:32:44.474670+00:00
+        example: '2020-03-03T15:32:44.474670+00:00'
+      filters:
+        $ref: '#/definitions/Filters'
+      link:
+        type: string
+        pattern: >-
+          '^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$'
+        description: >-
+          A link to a page with more information about the event (e.g. a link to
+          the CI/CD job, or a link to the PR.)
+
+
+          **Example:** http://jenkins.com/builds/production-feature
+        example: http://jenkins.com/builds/production-feature
+      metadata:
+        type: object
+        description: >-
+          An optional blob of arbitrary data containing any additional data
+          about the event.
+
+          **Example:** { 'user': 'sasha@company.com', 'git_sha':
+          '923dd0037a455576561b89c2321ffc36473578c7' }
+        example:
+          user: sasha@company.com
+          git_sha: 923dd0037a455576561b89c2321ffc36473578c7
+  Filters:
+    description: >-
+      Filters allow you to scope an event to a specific set of cloud resources.
+      Each field below is a different dimension you can use to scope a given
+      event to a resource or cloud cost that shares the value of that dimension.
+      **NOTE: Currently all events are shown on the Explorer, regardless of
+      filters.**
+    type: object
+    properties:
+      accounts:
+        type: array
+        description: >-
+          An array of [cloud provider account
+          IDs](https://app.cloudzero.com/explorer?partitions=accounts) for any
+          account that could be impacted by this event.
+
+          **Example:** ["012093365392", "055595555385"]
+        items:
+          type: string
+        example:
+          - '012093365392'
+          - '055595555385'
+      resource_ids:
+        type: array
+        description: >-
+          An array of cloud provider resource IDs or CZRNs (the globally unique
+          ID of the resource within the CloudZero system) for when you know that
+          this event corresponds to a specific set of resources.
+
+          **Example:**
+          ["arn:aws:lambda:us-east-1:055595555385:function:my-lambda-function"]
+        example:
+          - arn:aws:lambda:us-east-1:055595555385:function:my-lambda-function
+        items:
+          type: string
+      services:
+        type: array
+        description: >-
+          An array of any cloud services that are impacted by this event. You
+          can view a list of your current services on
+          [CloudZero](https://app.cloudzero.com/explorer?partitions=services)
+
+
+          **Example:** ["AWSLambda", "AmazonAthena", "AmazonEC2"]
+        items:
+          type: string
+        example:
+          - AWSLambda
+          - AmazonAthena
+          - AmazonEC2
+      tags:
+        type: object
+        description: |-
+          A dictionary of tag key/value pairs.
+
+          **Example:** {'feature': 'my-feature', 'team': 'my-team'}
+        example:
+          feature: my-feature
+          team: my-team
+      usage_families:
+        type: array
+        description: >-
+          An array of cloud service charges that might be impacted by this
+          event.
+
+
+          **Example:** ["DataTransfer-Out-Bytes", "Request"]
+        example:
+          - DataTransfer-Out-Bytes
+          - Request
+        items:
+          type: string
+  ApiResponse:
+    type: object
+    properties:
+      event:
+        allOf:
+          - $ref: '#/definitions/Event'
+          - type: object
+            properties:
+              event_id:
+                type: string
+                description: A unique string identifying the event in CloudZero.
+                example: 8ddc2bga-8e8g-499c-a5ee-cgfc4d333b22
