@@ -1,4 +1,0 @@
----
-title: events
-hidden: false
----

@@ -1,4 +1,0 @@
----
-title: views
-hidden: false
----
