@@ -131,7 +131,7 @@ Enter `y` to proceed.
 - A Lambda function named `aws-credits-processor`
 - An IAM role with least-privilege permissions
 
-### Subsequent deploys
+### If you are doing subsequent deploys...
 
 After the first deploy, pass credentials via `--parameter-overrides`:
 
