@@ -217,7 +217,7 @@ def test_cbf_rows_have_map_credit_fields(monkeypatch):
         handler.lambda_handler(make_s3_event("credits-2025-01.csv"), None)
 
     row = captured["data"][0]
-    assert row["lineitem/type"] == "MAP Credit (Monthly)"
+    assert row["lineitem/type"] == "Credit"
     assert row["lineitem/description"] == "Monthly MAP Credit"
     assert row["resource/service"] == "AWSCredits"
     assert row["cost/cost"] == "-10.00"

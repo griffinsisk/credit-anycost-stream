@@ -27,7 +27,7 @@ def _build_cbf_rows(credits: list[dict], usage_start: str, usage_end: str) -> li
         negated = str(-amount)
         rows.append(
             {
-                "lineitem/type": "MAP Credit (Monthly)",
+                "lineitem/type": "Credit",
                 "lineitem/description": "Monthly MAP Credit",
                 "time/usage_start": usage_start,
                 "time/usage_end": usage_end,

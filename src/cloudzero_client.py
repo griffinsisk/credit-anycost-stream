@@ -75,6 +75,15 @@ def post_billing_drop(
     )
 
     response = requests.post(url, json=payload, headers=headers, timeout=30)
+    if not response.ok:
+        logger.error(
+            "API error response",
+            extra={
+                "status_code": response.status_code,
+                "body": response.text[:500],
+                "billing_month": billing_month,
+            },
+        )
     response.raise_for_status()
 
     logger.info(

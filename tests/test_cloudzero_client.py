@@ -13,7 +13,7 @@ URL = f"https://api.cloudzero.com/v2/connections/billing/anycost/{CONNECTION_ID}
 
 SAMPLE_DATA = [
     {
-        "lineitem/type": "MAP Credit (Monthly)",
+        "lineitem/type": "Credit",
         "lineitem/description": "Monthly MAP Credit",
         "time/usage_start": "2025-01-01T00:00:00Z",
         "time/usage_end": "2025-01-31T23:59:59Z",
