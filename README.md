@@ -146,7 +146,9 @@ This reads the values from your shell environment variables and passes them to C
 
 ## Step 4 — Upload a credits file
 
-The filename must follow the pattern `credits-YYYY-MM.csv`. The billing month is read from the filename, not the upload date.
+> **Loading multiple months at once?** Skip to [Backfill historical credits](#backfill-historical-credits) — the backfill script handles multi-month CSVs and calls the API directly (no S3 upload needed).
+
+For ongoing monthly uploads, the filename must follow the pattern `credits-YYYY-MM.csv`. The billing month is read from the filename, not the upload date.
 
 ### Option A: Upload via the AWS Console (easiest)
 
@@ -193,17 +195,37 @@ The pipeline uses `replace_drop` — re-uploading the same month replaces the ex
 
 For the initial load of historical months, use the backfill script instead of uploading files to S3 one at a time. The script calls the CloudZero API directly (no Lambda involved).
 
+The script auto-detects two CSV formats:
+
+**Multi-column** — one column per month (best for backfills):
+```
+account_id, Jan amt, Feb amt, Mar amt, ...
+123456789012,$ 50.00,$ 75.00,$ 100.00
+234567890123,"$ 1,200.00","$ 1,500.00","$ 1,800.00"
+345678901234,$ -,$ 25.00,$ 50.00
+```
+
+**Two-column** — single amount, posted the same for every month:
+```
+123456789012,$100.00
+234567890123,"$1,500.00"
+```
+
+See `examples/credits-multimonth-example.csv` and `examples/credits-example.csv` for reference.
+
+### Usage
+
 ```bash
 # Dry run — validate without posting
 python3 scripts/backfill.py \
-  --csv examples/credits-example.csv \
+  --csv your-credits-file.csv \
   --start-month 2025-01 \
   --end-month 2026-01 \
   --dry-run
 
 # Real run — post all months
 python3 scripts/backfill.py \
-  --csv examples/credits-example.csv \
+  --csv your-credits-file.csv \
   --start-month 2025-01 \
   --end-month 2026-01
 ```
