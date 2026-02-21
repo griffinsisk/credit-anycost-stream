@@ -133,7 +133,7 @@ Enter `y` to proceed.
 
 ### If you are doing subsequent deploys...
 
-After the first deploy, pass credentials via `--parameter-overrides`:
+After the first deploy, you must pass credentials explicitly via `--parameter-overrides` (SAM won't re-prompt for `NoEcho` parameters):
 
 ```bash
 sam deploy \
@@ -148,7 +148,18 @@ This reads the values from your shell environment variables and passes them to C
 
 The filename must follow the pattern `credits-YYYY-MM.csv`. The billing month is read from the filename, not the upload date.
 
-Replace `<AccountId>` and `<Region>` with your values (you can find the bucket name in the deploy output):
+### Option A: Upload via the AWS Console (easiest)
+
+1. Open the [AWS Console](https://console.aws.amazon.com) and go to **S3**
+2. Find the bucket named `aws-credits-pipeline-<AccountId>-<Region>` (you can find this in the deploy output)
+3. Click **Upload**
+4. Click **Add files** and select your `credits-YYYY-MM.csv` file
+5. Click **Upload** at the bottom of the page
+6. Wait for the upload to complete — the Lambda triggers automatically within a few seconds
+
+### Option B: Upload via the CLI
+
+Replace `<AccountId>` and `<Region>` with your values:
 
 ```bash
 aws s3 cp credits-2025-01.csv s3://aws-credits-pipeline-<AccountId>-<Region>/credits-2025-01.csv
